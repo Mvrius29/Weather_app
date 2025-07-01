@@ -5,41 +5,63 @@
     <!-- Meta tags aici -->
     <title>Weather App</title>
     <link rel="stylesheet" href="style.css">
-   
+
 
 </head>
 
 <body>
     <div id="app">
         <p id="title">Weather app</p>
-        <div id="content-wrapper">
+         <div class="controls">
+                <div class="control-group">
+                    <label for="unit-select">Unit of temperature:</label>
+                    <select id="unit-select">
+                        <option value="metric">Celsius(°C)</option>
+                        <option value="imperial">Fahrenheit(°F)</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="lang-select">Descprition language:</label>
+                    <select id="lang-select">
+                            <option value="en" selected>Engleză</option>
+                            <option value="ro">Română</option>
+                    </select>
+                </div>
+                <button  id="save-btn">Save</button>
+            </div>
+        <div id="content-wrapper" >
             <div id="search">
                 <input type="text" id="search-bar">
                 <button id="search-btn">Search</button>
             </div>
-   <div id="loading" class="hidden" >Loading...</div>
-   <div id="error" class="hidden"><p id="error-content"></p></div>
-       <div id="informations" style="display: none">
-            <div id="location-details">
-                <p id="city-input">cc</p>
-                <p id="city-temp">tt</p> 
-                <p id="feels-like-row">Se simte ca: <span id="feels-like"></span></p>
-                <div id="weather-type-container">
-                    <p id="location-weather-type"></p>
+           <button id="my-location">My location</button>
+            <div id="loading" class="hidden">Loading...</div>
+            <div id="error" class="hidden">
+                <p id="error-content"></p>
+            </div>
+            <div id="informations" style="display: none">
+                <div id="location-details">
+                    <p id="date"></p>
+                    <p id="city-input">cc</p>
+                    <p id="city-temp">tt</p>
+                    <p id="feels-like-row">Feels like: <span id="feels-like"></span></p>
+                    <div id="weather-type-container">
+                        <p id="location-weather-type"></p>
+                    </div>
+                </div>
+
+                <!-- Informații suplimentare, sub location-details -->
+                <div id="additional-info">
+                    <p><strong>Umidity:</strong> <span id="humidity"></span></p>
+                    <p><strong>Pressure:</strong> <span id="pressure"></span></p>
+                    <p><strong>Wind:</strong> <span id="wind"></span></p>
+                    <p><strong>Sunrise:</strong> <span id="sunrise"></span></p>
+                    <p><strong>Visibility:</strong> <span id="visibility"></span></p>
+                    <p><strong>Sunset:</strong> <span id="sunset"></span></p>
                 </div>
             </div>
-
-            <!-- Informații suplimentare, sub location-details -->
-            <div id="additional-info">
-                <p><strong>Umiditate:</strong> <span id="humidity"></span></p>
-                <p><strong>Presiune:</strong> <span id="pressure"></span></p>
-                <p><strong>Vânt:</strong> <span id="wind"></span></p>
-                <p><strong>Răsărit:</strong> <span id="sunrise"></span></p>
-                <p><strong>Vizibilitate:</strong> <span id="visibility"></span></p>
-                <p><strong>Apus:</strong> <span id="sunset"></span></p>
-            </div>
         </div>
-    </div>
     </div>
     <script type="module" src="app.js"></script>
 </body>
