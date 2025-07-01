@@ -1,29 +1,74 @@
-// import('./modules/config.js').then((config) => {
-//   console.log('MOCK_DATA:', config.MOCK_DATA)
-// })
+import { getCoords } from './modules/location-service.js'
+import {
+  getCurrentWeather,
+  getWeatherByCoords,
+  getCurrentWeatherWithFallback,
+} from './modules/weather-service.js'
+import {
+  showError,
+  hideError,
+  showLoading,
+  hideLoading,
+  displayWeather,
+  saveUserPreferences,
+  loadUserPreferences,
+  updateTemperatureDisplay,
+  updateUserPreferences,
+} from './modules/ui-controller.js'
+import { CONFIG } from './modules/config.js'
 
-// import('./modules/weather-service.js').then((service) => {
-//   console.time('weather-test')
-//   service.getCurrentWeather('Cluj').then((data) => {
-//     console.timeEnd('weather-test') // ~1000ms?
-//     console.log('Received data:', data)
-//     console.log('City updated?', data.name === 'Cluj')
-//   })
-// })
+const unitSelect = document.querySelector('#unit-select')
+const langSelect = document.querySelector('#lang-select')
+const preferrenceBtn = document.querySelector('#save-btn')
 
-// import('./modules/ui-controller.js').then((ui) => {
-//   ui.showLoading();
+function  resetSaveButton() {
+  preferrenceBtn.textContent = 'Save';
+  preferrenceBtn.style.backgroundColor = '';
+}
+preferrenceBtn.addEventListener('click', () => {
+  if (localStorage.getItem('preferredUnit') !== null && localStorage.getItem('preferredLanguage') !== null)
+    updateUserPreferences(unitSelect.value, langSelect.value)
+  else
+    saveUserPreferences(unitSelect.value, langSelect.value);
+  CONFIG.DEFAULT_UNITS = unitSelect.value;
+  CONFIG.DEFAULT_LANG = langSelect.value;
+  preferrenceBtn.textContent = 'Saved';
+  preferrenceBtn.style.backgroundColor = 'grey'
 
-//   setTimeout(() => {
-//     import('./modules/config.js').then((config) => {
-//       ui.displayWeather(config.MOCK_DATA);
-//       ui.hideLoading();
-//     });
-//   }, 3000);
-// });
+})
 
-import { showLoading, hideLoading, showError, displayWeather, hideError } from './modules/ui-controller.js';
-import { MOCK_DATA } from './modules/config.js';
+unitSelect.addEventListener('change', resetSaveButton);
+langSelect.addEventListener('change', resetSaveButton);
+
+const isValidCity = (city) => {
+  return city.length >= 2 && /^[a-zA-ZăâîșțĂÂÎȘȚ\\s-]+$/.test(city)
+}
+
+const handleSearch = async () => {
+  const informations = document.querySelector('#informations')
+  informations.style.display = 'none'
+  hideError()
+
+  const cityName = document.querySelector('#search-bar').value.trim()
+  try{
+     if (!isValidCity(cityName)) 
+        throw new Error('Introduceti un numae valid de oras')
+   
+    showLoading()
+    hideError()
+    setTimeout(async function ()  {
+      const weather = await getCurrentWeatherWithFallback(cityName)
+      console.log(weather)
+      const informations = document.querySelector('#informations')
+      informations.style.display = 'block' 
+      hideLoading()
+      displayWeather(weather)
+     
+    }, 2000)
+  }catch(error){
+    showError(error)
+  }
+}
 
 const setupEventListeners = () => {
   // Submit în form (enter din search field sau click pe buton)
@@ -37,35 +82,29 @@ const setupEventListeners = () => {
 });
 }
 
-const handleSearch = async () => {
-  // Validează input
-  // Arată loading
-  // Apelează weather service
-  // Ascunde loading, arată rezultat
-  // Gestionează erorile
-  const informations = document.querySelector('#informations')
-  informations.style.display = 'none'
+
+const mylocationBtn = document.querySelector('#my-location')
+
+mylocationBtn.addEventListener('click', async function () {
+  
+  try{
   hideError()
-   const cityName = document.querySelector('#search-bar').value.trim()
-   if(isValidCity(cityName)){
-      showLoading()
-       hideError()
-      setTimeout(() => {
-         
-        const informations = document.querySelector('#informations')
-        informations.style.display = 'block'
-
-          displayWeather(MOCK_DATA)
-          hideLoading()
-      }, 2000)
-   }
-   else {
-     showError('Introduceti un nume valid de oras!')
-   }
-}
-
-const isValidCity = (city) => {
-  // Gol? Prea scurt? Conține cifre/simboluri?
-  return city.length >= 2 && /^[a-zA-ZăâîșțĂÂÎȘȚ\\s-]+$/.test(city)
-}
+  const informations = document.querySelector('#informations')
+  if(informations.style.display === 'block')
+  informations.style.display = 'none'
+   
+  showLoading()
+  
+  const coords = await getCoords()
+  const weather = await getWeatherByCoords(coords.latitude,coords.longitude)
+  
+  informations.style.display = 'block'
+  hideLoading()
+  displayWeather(weather)
+  
+  }catch(error){
+    showError(error)
+  }
+  
+})
 setupEventListeners()
