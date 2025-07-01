@@ -1,10 +1,10 @@
 export const MOCK_DATA = {
   coord: {
-    lon: 26.1,
-    lat: 44.4
+    lon: 29,
+    lat: 49.4
   },
   main: {
-    temp: 284,
+    temp: 288,
     feels_like: 287,
     temp_min: 22,
     temp_max: 28,
@@ -17,7 +17,7 @@ export const MOCK_DATA = {
     {
       id: 500,
       main: "Rain",
-      description: "light rain",
+      description: "THIS ARE NOT REAL INFORMATIONS!",
       icon: "10d"
     }
   ],
@@ -34,4 +34,28 @@ export const MOCK_DATA = {
     sunrise: 1687852800,
     sunset: 1687906800
   }
-};
+}
+
+export const CONFIG = {
+  API_KEY: '040da6b484828f330abb15b418b09130', 
+  API_BASE_URL: 'https://api.openweathermap.org/data/2.5/' ,
+  IP_API_URL: 'https://ipapi.co/json',
+  DEFAULT_UNITS: 'metric' ,
+  DEFAULT_LANG: 'ro'
+}
+
+export const API_ENDPOINTS = {
+  CURRENT_WEATHER: 'https://api.openweathermap.org/data/2.5/weather' ,
+  FORECAST: 'https://pro.openweathermap.org/data/2.5/forecast/hourly' ,
+
+}
+
+
+export const ERROR_MESSAGES = {
+  CITY_NOT_FOUND: 'The city does not exit!',
+  NETWORK_ERROR: 'Internet problems!',
+  SERVER_ERROR: 'Server doesnt work!',
+  INVALID_API:'Api is invalid!',
+  LOCATION_UNAVAILABLE: 'Location can not be accesed',
+  LOCATION_DENIED: 'Acces denied to location'
+}
