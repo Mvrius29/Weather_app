@@ -1,5 +1,5 @@
 export const elements = {
-  date : document.querySelector('#date'),
+  date: document.querySelector('#date'),
   main: {
     temp: document.querySelector('#city-temp'),
     humidity: document.querySelector('#humidity'),
@@ -21,7 +21,10 @@ export const elements = {
   },
 
   unitSelect: document.getElementById('unit-select'),
-  langSelect: document.getElementById('lang-select')
+  langSelect: document.getElementById('lang-select'),
+  historySection: document.querySelector('#history-section'),
+  historyList: document.querySelector('#history-list'),
+  clearHistoryBtn: document.querySelector('#clear-history-btn'),
 
 }
 
@@ -61,20 +64,18 @@ export const hideError = () => {
 
 export const displayWeather = (user) => {
   elements.sys.cityInput.textContent = user.name
-  
+
   /// Temperature 
   let unitSelect
-  if (localStorage.getItem('preferredUnit') !== null )
+  if (localStorage.getItem('preferredUnit') !== null)
     unitSelect = localStorage.getItem('preferredUnit');
-  if(unitSelect === 'imperial')
-  {
-  elements.main.temp.textContent = `${Math.round(user.main.temp + 273.15)} °F`
-  elements.main.feelslike.textContent = `${Math.round(user.main.feels_like + 273.15)} °F`
+  if (unitSelect === 'imperial') {
+    elements.main.temp.textContent = `${Math.round(user.main.temp + 273.15)} °F`
+    elements.main.feelslike.textContent = `${Math.round(user.main.feels_like + 273.15)} °F`
   }
-  else 
-  {
-     elements.main.temp.textContent = `${user.main.temp } °C`
-    elements.main.feelslike.textContent = `${user.main.feels_like } °C`
+  else {
+    elements.main.temp.textContent = `${Math.round(user.main.temp)} °C`
+    elements.main.feelslike.textContent = `${Math.round(user.main.feels_like)} °C`
   }
   elements.main.humidity.textContent = `${user.main.humidity} %`
   elements.main.pressure.textContent = `${user.main.pressure} hPa`
@@ -82,18 +83,18 @@ export const displayWeather = (user) => {
   elements.visibility.textContent = `${user.visibility} m`
 
   const months = [
-  'ianuarie', 'februarie', 'martie', 'aprilie', 'mai', 'iunie',
-  'iulie', 'august', 'septembrie', 'octombrie', 'noiembrie', 'decembrie'
-];
+    'ianuarie', 'februarie', 'martie', 'aprilie', 'mai', 'iunie',
+    'iulie', 'august', 'septembrie', 'octombrie', 'noiembrie', 'decembrie'
+  ];
 
-const today = new Date();
+  const today = new Date();
 
-const day = today.getDate(); 
-const month = months[today.getMonth()]; 
-const year = today.getFullYear();
+  const day = today.getDate();
+  const month = months[today.getMonth()];
+  const year = today.getFullYear();
 
-const dates = `${day} ${month} ${year}`;
-elements.date.textContent = `${dates}`
+  const dates = `${day} ${month} ${year}`;
+  elements.date.textContent = `${dates}`
   if (user.wind?.speed) {
     const speedkm = user.wind.speed * 3.6;
     elements.wind.textContent = `${speedkm.toFixed(2)} km/h`;
@@ -120,17 +121,17 @@ elements.date.textContent = `${dates}`
   if (user.weather[0].main === 'Clouds') elements.weather.type.textContent += '☁️'
 }
 
-export const updateTemperatureDisplay = (elements, temperature, unit) => {
+// export const updateTemperatureDisplay = (elements, temperature, unit) => {
 
-  const gradesType = document.querySelector('#unit-select')
-  const selectedText = gradesType.options[gradesType.selectedIndex].text
-  let symbol
-  if (selectedText == 'metric')
-    symbol = '°C'
-  else
-    symbol = '°F'
-  elements.temperature.textContent = `${temperature}${symbol}`
-}
+//   const gradesType = document.querySelector('#unit-select')
+//   const selectedText = gradesType.options[gradesType.selectedIndex].text
+//   let symbol
+//   if (selectedText == 'metric')
+//     symbol = '°C'
+//   else
+//     symbol = '°F'
+//   elements.temperature.textContent = `${temperature}${symbol}`
+// }
 
 export const saveUserPreferences = (unit, lang) => {
   const langSelect = document.getElementById('lang-select');
@@ -148,18 +149,18 @@ export const loadUserPreferences = () => {
   //default values
   let unitPref = 'metric'
   let langPref = 'en'
-  
+
   const langSelect = document.getElementById('lang-select');
   const unitSelect = document.getElementById('unit-select');
 
-  
+
   unitPref = localStorage.getItem('preferredUnit')
   langPref = localStorage.getItem('preferredLanguage')
 
-  if(unitPref)
-      unitSelect.value = unitPref
-  if(langPref)
-      langSelect.value = langPref
+  if (unitPref)
+    unitSelect.value = unitPref
+  if (langPref)
+    langSelect.value = langPref
 
   return {
     unit: unitPref,
@@ -168,9 +169,75 @@ export const loadUserPreferences = () => {
 }
 
 export const updateUserPreferences = () => {
-   const langSelect = document.getElementById('lang-select');
-   const unitSelect = document.getElementById('unit-select');
+  const langSelect = document.getElementById('lang-select');
+  const unitSelect = document.getElementById('unit-select');
 
-   localStorage.setItem('preferredUnit', unitSelect.value);
-   localStorage.setItem('preferredLanguage', langSelect.value)
+  localStorage.setItem('preferredUnit', unitSelect.value);
+  localStorage.setItem('preferredLanguage', langSelect.value)
+}
+
+export const getTimeAgo = (timestamp) => {
+  const now = Date.now()
+  const diff = now - timestamp
+  const minutes = Math.floor(diff / 60000)
+  const hours = Math.floor(diff / 3600000)
+  const days = Math.floor(diff / 86400000)
+
+  if (minutes < 60) return `${minutes} minute în urmă`
+  if (hours < 24) return `${hours} ore în urmă`
+  return `${days} zile în urmă`
+}
+
+export const showHistory = () => {
+  elements.historySection.classList.remove('hidden')
+}
+
+export const hideHistory = () => {
+  elements.historySection.classList.add('hidden')
+}
+
+export const renderHistory = (historyItems) => {
+  // Construiește HTML pentru fiecare item din istoric
+  // Fiecare item ar trebui să fie clickabil
+  // Afișează orașul, țara și timpul relativ (ex: "2 ore în urmă")
+
+  if (historyItems.length === 0) {
+    elements.historyList.innerHTML = `<option value="" selected disabled>Alege o opțiune...</option>`
+    return
+  }
+  
+  const historyHtml = historyItems.map((item) => {
+    const miliseconds = Date.parse(item.timestamp)
+    const timeago = getTimeAgo(miliseconds)
+
+   const optionText = `${item.city}, ${item.country} | ${timeago}`;
+
+    return `<option value="history-member" data-city="${item.city}" data-lat="${item.lat}"  data-lon="${item.lon}">${optionText}</option>`;
+  }).join('');
+
+    elements.historyList.innerHTML = `
+    <option value="" selected disabled>Alege o opțiune...</option>
+    ${historyHtml}`
+
+}
+
+export const addHistoryEventListeners = (onHistoryClick, onClearHistory) => {
+  const historyList = document.getElementById('history-list');
+  const clearHistoryBtn = document.getElementById('clear-history-btn');
+
+ 
+  historyList.addEventListener('change', (event) => {
+    const clickedItem = event.target.value;
+
+    onHistoryClick(clickedItem);
+  });
+
+  clearHistoryBtn.addEventListener('click', () => {
+    onClearHistory();
+  });
+};
+
+export const clearInput = () => {
+  const searchBar = document.querySelector("#search-bar")
+  searchBar.textContent=''
 }

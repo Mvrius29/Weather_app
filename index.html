@@ -12,30 +12,40 @@
 <body>
     <div id="app">
         <p id="title">Weather app</p>
-         <div class="controls">
-                <div class="control-group">
-                    <label for="unit-select">Unit of temperature:</label>
-                    <select id="unit-select">
-                        <option value="metric">Celsius(°C)</option>
-                        <option value="imperial">Fahrenheit(°F)</option>
-                    </select>
-                </div>
-
-                <div class="control-group">
-                    <label for="lang-select">Descprition language:</label>
-                    <select id="lang-select">
-                            <option value="en" selected>Engleză</option>
-                            <option value="ro">Română</option>
-                    </select>
-                </div>
-                <button  id="save-btn">Save</button>
+        <div class="controls">
+            <div class="control-group">
+                <label for="unit-select">Unit of temperature:</label>
+                <select id="unit-select">
+                    <option value="metric">Celsius(°C)</option>
+                    <option value="imperial">Fahrenheit(°F)</option>
+                </select>
             </div>
-        <div id="content-wrapper" >
+
+            <div class="control-group">
+                <label for="lang-select">Descprition language:</label>
+                <select id="lang-select">
+                    <option value="en" selected>Engleză</option>
+                    <option value="ro">Română</option>
+                </select>
+            </div>
+            <button id="save-btn">Save</button>
+        </div>
+        <div id="content-wrapper">
             <div id="search">
                 <input type="text" id="search-bar">
                 <button id="search-btn">Search</button>
             </div>
-           <button id="my-location">My location</button>
+            
+                <button id="history-btn">History</button>
+             <div id="history-section" class="history-section hidden">
+                <h3>Căutări recente</h3>
+                <select id="history-list" class="history-list"></select>
+                <button id="clear-history-btn" class="clear-history-btn">
+                    Șterge istoricul
+                </button>
+                <button id="hide-history" class="hide-history-btn">Hide</button>
+            </div>
+            <button id="my-location">My location</button>
             <div id="loading" class="hidden">Loading...</div>
             <div id="error" class="hidden">
                 <p id="error-content"></p>
