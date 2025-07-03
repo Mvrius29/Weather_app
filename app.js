@@ -1,10 +1,10 @@
 import { getCoords } from './modules/location-service.js'
 import {
-  getCurrentWeather,
   getWeatherByCoords,
   getCurrentWeatherWithFallback,
 } from './modules/weather-service.js'
 import {
+  clearInput,
   showError,
   hideError,
   showLoading,
@@ -12,16 +12,42 @@ import {
   displayWeather,
   saveUserPreferences,
   loadUserPreferences,
-  updateTemperatureDisplay,
   updateUserPreferences,
+  renderHistory,
+  addHistoryEventListeners,
 } from './modules/ui-controller.js'
 import { CONFIG } from './modules/config.js'
+import { logger } from './modules/logger.js'
+import { historyService } from './modules/history-service.js'
+
+const initializeApp = async () => {
+  logger.info('Weather App starting...')
+  
+  setupEventListeners()
+  loadHistoryOnStart()
+  loadUserPreferences()
+
+  logger.info('Weather App initialized successfully')
+}
+
+
+const loadHistoryOnStart = () => {
+  const history = historyService.getHistory()
+  if (history.length > 0) {
+    renderHistory(history)
+    logger.info(`Loaded ${history.length} items from history`)
+  }
+  else {
+    const historyList = document.querySelector('#history-list')
+    historyList.innerHTML += '<option value="" selected disabled>Alege o opțiune...</option>'
+  }
+}
 
 const unitSelect = document.querySelector('#unit-select')
 const langSelect = document.querySelector('#lang-select')
 const preferrenceBtn = document.querySelector('#save-btn')
 
-function  resetSaveButton() {
+function resetSaveButton() {
   preferrenceBtn.textContent = 'Save';
   preferrenceBtn.style.backgroundColor = '';
 }
@@ -40,6 +66,20 @@ preferrenceBtn.addEventListener('click', () => {
 unitSelect.addEventListener('change', resetSaveButton);
 langSelect.addEventListener('change', resetSaveButton);
 
+const historyBtn = document.querySelector('#history-btn')
+historyBtn.addEventListener('click', () => {
+  historyBtn.classList.add('hidden')
+  const historySection = document.querySelector('#history-section')
+  historySection.classList.remove('hidden')
+})
+
+const hideHistoryBtn = document.querySelector('.hide-history-btn')
+hideHistoryBtn.addEventListener('click', () => {
+  const historySection = document.querySelector('#history-section')
+  historySection.classList.add('hidden')
+  historyBtn.classList.remove('hidden')
+
+})
 const isValidCity = (city) => {
   return city.length >= 2 && /^[a-zA-ZăâîșțĂÂÎȘȚ\\s-]+$/.test(city)
 }
@@ -47,64 +87,160 @@ const isValidCity = (city) => {
 const handleSearch = async () => {
   const informations = document.querySelector('#informations')
   informations.style.display = 'none'
-  hideError()
+
 
   const cityName = document.querySelector('#search-bar').value.trim()
-  try{
-     if (!isValidCity(cityName)) 
-        throw new Error('Introduceti un numae valid de oras')
-   
+  logger.debug('Search initiated', { cityName })
+  hideError()
+  try {
+    if (!isValidCity(cityName)) {
+      logger.warn('Invalid city input', { cityName })
+      throw new Error('Introduceti un numae valid de oras')
+    }
+    logger.info('Fetching weather data', { cityName })
     showLoading()
     hideError()
-    setTimeout(async function ()  {
+    setTimeout(async function () {
+
       const weather = await getCurrentWeatherWithFallback(cityName)
       console.log(weather)
+      historyService.addLocation(weather)
+
       const informations = document.querySelector('#informations')
-      informations.style.display = 'block' 
-      hideLoading()
+      informations.style.display = 'block'
+
+      const historySection = document.querySelector('#history-section')
+      if (!historySection.classList.contains('hidden'))
+        historySection.classList.add('hidden')
+
+      if (historyBtn.classList.contains('hidden'))
+        historyBtn.classList.remove('hidden')
+
       displayWeather(weather)
-     
+      clearInput()
+      hideLoading()
+
+      const updatedHistory = historyService.getHistory()
+      renderHistory(updatedHistory)
+
+
+      logger.info('Weather data displayed successfully', {
+        city: weather.name,
+        temp: weather.main.temp,
+      })
+
     }, 2000)
-  }catch(error){
+  } catch (error) {
     showError(error)
+    logger.error('Failed to fetch weather data', error)
   }
 }
+
+const handleHistoryClick = async (event) => {
+  const historyList = document.querySelector('#history-list')
+  const optionSelected = historyList.options[historyList.selectedIndex]
+  console.log(optionSelected.city)
+  const city = optionSelected.dataset.city
+  const lat = parseFloat(optionSelected.dataset.lat)
+  const lon = parseFloat(optionSelected.dataset.lon)
+
+  logger.info('History item clicked', { city, lat, lon })
+  try {
+    logger.info('Fetching weather data', { city })
+
+    showLoading()
+    hideError()
+    setTimeout(async function () {
+
+      const weather = await getWeatherByCoords(lat, lon)
+      console.log(weather)
+      historyService.addLocation(weather)
+
+      const informations = document.querySelector('#informations')
+      informations.style.display = 'block'
+
+      const historySection = document.querySelector('#history-section')
+      if (!historySection.classList.contains('hidden'))
+        historySection.classList.add('hidden')
+       
+        if (historyBtn.classList.contains('hidden'))
+        historyBtn.classList.remove('hidden')
+
+      hideLoading()
+      displayWeather(weather)
+
+      const updatedHistory = historyService.getHistory()
+      renderHistory(updatedHistory)
+
+      logger.info('Weather loaded from history', { city })
+    }, 2000)
+  } catch (error) {
+    showError(error)
+    logger.error('Failed to load weather from history', error)
+  }
+}
+
+const handleClearHistory = () => {
+  if (confirm('Are you sure that you want to delete all history?')) {
+    historyService.clearHistory()
+    renderHistory([])
+    const historyBtn1 = document.querySelector('#history-btn')
+    if (historyBtn1.classList.contains('.hidden'))
+      historyBtn1.classList.remove('hidden')
+    logger.info('Search history cleared')
+  }
+}
+
+
 
 const setupEventListeners = () => {
   // Submit în form (enter din search field sau click pe buton)
   const searchBtn = document.querySelector('#search-btn')
-  searchBtn.addEventListener("click",handleSearch)
+  searchBtn.addEventListener("click", handleSearch)
 
-  searchBtn.addEventListener('keydown', function(event) {
-  if (event.key === 'Enter') {
-    handleSearch();
-  }
-});
+  searchBtn.addEventListener('keydown', function (event) {
+    if (event.key === 'Enter') {
+      handleSearch();
+    }
+  });
+  addHistoryEventListeners(handleHistoryClick, handleClearHistory)
 }
 
 
 const mylocationBtn = document.querySelector('#my-location')
 
 mylocationBtn.addEventListener('click', async function () {
-  
-  try{
-  hideError()
-  const informations = document.querySelector('#informations')
-  if(informations.style.display === 'block')
-  informations.style.display = 'none'
-   
-  showLoading()
-  
-  const coords = await getCoords()
-  const weather = await getWeatherByCoords(coords.latitude,coords.longitude)
-  
-  informations.style.display = 'block'
-  hideLoading()
-  displayWeather(weather)
-  
-  }catch(error){
+
+  try {
+    logger.debug('Fetching your location wheather')
+    hideError()
+    const informations = document.querySelector('#informations')
+    if (informations.style.display === 'block')
+      informations.style.display = 'none'
+    
+    const historySection = document.querySelector('#history-section')
+      if (!historySection.classList.contains('hidden'))
+        historySection.classList.add('hidden')
+     
+
+    showLoading()
+
+    const coords = await getCoords()
+    const weather = await getWeatherByCoords(coords.latitude, coords.longitude)
+
+    informations.style.display = 'block'
+    if (historyBtn.classList.contains('hidden'))
+        historyBtn.classList.remove('hidden')
+    hideLoading()
+    displayWeather(weather)
+
+    logger.info('Fetching weather for your location succedeed', { weather })
+
+  } catch (error) {
     showError(error)
   }
-  
+
 })
-setupEventListeners()
+initializeApp()
+
+
