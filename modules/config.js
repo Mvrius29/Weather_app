@@ -41,7 +41,18 @@ export const CONFIG = {
   API_BASE_URL: 'https://api.openweathermap.org/data/2.5/' ,
   IP_API_URL: 'https://ipapi.co/json',
   DEFAULT_UNITS: 'metric' ,
-  DEFAULT_LANG: 'ro'
+  DEFAULT_LANG: 'ro',
+
+  MAX_HISTORY_ITEMS: 10,
+  STORAGE_KEYS: {
+    SEARCH_HISTORY: 'weather_search_history',
+    USER_PREFERENCES: 'weather_user_prefs',
+  },
+  LOGGING: {
+    ENABLED: true,
+    LEVEL: 'debug', // 'debug', 'info', 'warn', 'error'
+    MAX_LOGS: 100,
+  },
 }
 
 export const API_ENDPOINTS = {
