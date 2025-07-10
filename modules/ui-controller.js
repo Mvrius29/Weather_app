@@ -202,7 +202,7 @@ export const renderHistory = (historyItems) => {
   // Afișează orașul, țara și timpul relativ (ex: "2 ore în urmă")
 
   if (historyItems.length === 0) {
-    elements.historyList.innerHTML = `<option value="" selected disabled>Alege o opțiune...</option>`
+    elements.historyList.innerHTML = `<option value="" selected disabled>Choose an option...</option>`
     return
   }
   
@@ -216,7 +216,7 @@ export const renderHistory = (historyItems) => {
   }).join('');
 
     elements.historyList.innerHTML = `
-    <option value="" selected disabled>Alege o opțiune...</option>
+    <option value="" selected disabled>Choose an option...</option>
     ${historyHtml}`
 
 }
