@@ -108,7 +108,7 @@ const handleSearch = async () => {
     showLoading()
     hideError()
     setTimeout(async function () {
-       
+    
      
       console.log(weatherInformation)
 
@@ -152,10 +152,13 @@ const handleHistoryClick = async (event) => {
   const lat = parseFloat(optionSelected.dataset.lat)
   const lon = parseFloat(optionSelected.dataset.lon)
 
+  const informations = document.querySelector('#informations')
+  informations.style.display = 'none'
   logger.debug('History item clicked', { city, lat, lon })
   try {
     logger.info('Fetching weather data', { city })
-
+       const searchBar = document.querySelector('#search-bar')
+       searchBar.textContent = ''
     showLoading()
     hideError()
     setTimeout(async function () {
