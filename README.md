@@ -2,7 +2,7 @@
 
 > A complete weather application built with vanilla JavaScript, integrating real APIs and modern best practices.
 
-[Demo Live](<https://Mvrius29.github.io/weather-app>) | [Cod Sursă](<https://github.com/Mvrius29/weather-app>)
+[Demo Live](<https://mvrius29.github.io/Weather_app/>) | [Cod Sursă](<https://github.com/Mvrius29/Weather_app/tree/feature/api-integration>)
 
 ## 🎯 Despre Proiect
 
@@ -15,17 +15,16 @@
 
 - Detailed information
 
-![alt text](image.png)
+![alt text](images/image.png)
 
 -History system
 
-![alt text](image-3.png)
-![alt text](image-4.png)
+![alt text](images/image-3.png) ![alt text](images/image-4.png)
 
 -Option to choose the type of desired unit of measurement and the language of the descriptions
 
-![alt text](image-5.png)
-![alt text](image-8.png)
+![alt text](images/image-5.png)
+![alt text](images/image-8.png)
 
 ### Advanced Features
 
@@ -106,4 +105,5 @@ weather-app/
 One of the interested problems that i faced was to learn how to implement the logger service, because for a begginer, from my perspective, it might be a little bit difficult. Another problem that was interesting was to save and display the history of searches. 
 Overall, after i understand how exactly apis works my job become a liitle bit easier, but , like in life, nothing come easy, and in this project i put a lot of work to make him possibile.
 PS: I admit that i need to some little things(on visiual), but i will do it in future.:))
+
 
