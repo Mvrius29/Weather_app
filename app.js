@@ -2,6 +2,7 @@ import { getCoords } from './modules/location-service.js'
 import {
   getWeatherByCoords,
   getCurrentWeatherWithFallback,
+  getCurrentWeather,
 } from './modules/weather-service.js'
 import {
   clearInput,
@@ -16,13 +17,12 @@ import {
   renderHistory,
   addHistoryEventListeners,
 } from './modules/ui-controller.js'
-import { CONFIG } from './modules/config.js'
+import { CONFIG, MOCK_DATA } from './modules/config.js'
 import { logger } from './modules/logger.js'
 import { historyService } from './modules/history-service.js'
 
 const initializeApp = async () => {
   logger.info('Weather App starting...')
-  
   setupEventListeners()
   loadHistoryOnStart()
   loadUserPreferences()
@@ -39,7 +39,7 @@ const loadHistoryOnStart = () => {
   }
   else {
     const historyList = document.querySelector('#history-list')
-    historyList.innerHTML += '<option value="" selected disabled>Alege o opțiune...</option>'
+    historyList.innerHTML += '<option value="" selected disabled>Choose an option...</option>'
   }
 }
 
@@ -81,30 +81,36 @@ hideHistoryBtn.addEventListener('click', () => {
 
 })
 const isValidCity = (city) => {
-  return city.length >= 2 && /^[a-zA-ZăâîșțĂÂÎȘȚ\\s-]+$/.test(city)
+  return city.length >= 2 && /^[a-zA-ZăâîșțĂÂÎȘȚ\s-]+$/.test(city)
 }
 
 const handleSearch = async () => {
   const informations = document.querySelector('#informations')
   informations.style.display = 'none'
-
-
-  const cityName = document.querySelector('#search-bar').value.trim()
-  logger.debug('Search initiated', { cityName })
+  const cityName = document.querySelector('#search-bar').value.trim();
+  
+  console.log(cityName)
   hideError()
   try {
     if (!isValidCity(cityName)) {
       logger.warn('Invalid city input', { cityName })
-      throw new Error('Introduceti un numae valid de oras')
+      throw new Error('Insert an valid city name')
     }
+    if(isValidCity(cityName)){ 
+    const weatherInformation = await getCurrentWeatherWithFallback(cityName)
+    if(weatherInformation.name === 'FallbackCity')
+    {
+      displayWeather(MOCK_DATA)
+      logger.warn('This city doesnt exist', {cityName})
+    }
+    logger.debug('Search initiated', { cityName })
     logger.info('Fetching weather data', { cityName })
     showLoading()
     hideError()
     setTimeout(async function () {
-
-      const weather = await getCurrentWeatherWithFallback(cityName)
-      console.log(weather)
-      historyService.addLocation(weather)
+       
+     
+      console.log(weatherInformation)
 
       const informations = document.querySelector('#informations')
       informations.style.display = 'block'
@@ -116,21 +122,23 @@ const handleSearch = async () => {
       if (historyBtn.classList.contains('hidden'))
         historyBtn.classList.remove('hidden')
 
-      displayWeather(weather)
+      displayWeather(weatherInformation)
       clearInput()
       hideLoading()
-
+      if(weatherInformation.name !== 'FallbackCity'){
+      historyService.addLocation(weatherInformation)
       const updatedHistory = historyService.getHistory()
       renderHistory(updatedHistory)
-
+      }
 
       logger.info('Weather data displayed successfully', {
-        city: weather.name,
-        temp: weather.main.temp,
+        city: weatherInformation.name,
+        temp: weatherInformation.main.temp,
       })
 
     }, 2000)
-  } catch (error) {
+  }
+ } catch (error) {
     showError(error)
     logger.error('Failed to fetch weather data', error)
   }
@@ -144,7 +152,7 @@ const handleHistoryClick = async (event) => {
   const lat = parseFloat(optionSelected.dataset.lat)
   const lon = parseFloat(optionSelected.dataset.lon)
 
-  logger.info('History item clicked', { city, lat, lon })
+  logger.debug('History item clicked', { city, lat, lon })
   try {
     logger.info('Fetching weather data', { city })
 
@@ -198,12 +206,13 @@ const setupEventListeners = () => {
   const searchBtn = document.querySelector('#search-btn')
   searchBtn.addEventListener("click", handleSearch)
 
-  searchBtn.addEventListener('keydown', function (event) {
+  document.addEventListener('keydown', function (event) {
     if (event.key === 'Enter') {
       handleSearch();
     }
   });
   addHistoryEventListeners(handleHistoryClick, handleClearHistory)
+  const inputSearch = document.querySelector('#search-bar')
 }
 
 
@@ -238,9 +247,13 @@ mylocationBtn.addEventListener('click', async function () {
 
   } catch (error) {
     showError(error)
+    logger.error('Failed to fetch weather data',error)
   }
 
 })
 initializeApp()
+
+
+
 
 
