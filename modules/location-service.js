@@ -17,7 +17,6 @@ export const getCoords = () => new Promise((resolve, reject) => {
         accuracy: 'city' 
       })
     } catch (error) {
-   
       reject(error)
     }
   }

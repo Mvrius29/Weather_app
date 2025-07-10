@@ -1,11 +1,12 @@
 export const MOCK_DATA = {
+  name: 'FallbackCity',
   coord: {
     lon: 29,
     lat: 49.4
   },
   main: {
-    temp: 288,
-    feels_like: 287,
+    temp: 28,
+    feels_like: 27,
     temp_min: 22,
     temp_max: 28,
     pressure: 1013,
